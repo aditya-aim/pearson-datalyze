@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Creation Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            transition: transform 0.3s ease;
+        }
+        .chat-message {
+            max-width: 80%;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 1rem;
+        }
+        .chat-message.user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: auto;
+        }
+        .chat-message.agent {
+            background: #f3f4f6;
+            margin-right: auto;
+        }
+        .tool-card {
+            transition: all 0.3s ease;
+        }
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        /* New styles for the create agent form */
+        .form-control {
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .form-label {
+            color: #4a5568;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        .form-check-input {
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-top: 0.25rem;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        .form-check-input:checked {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+        .form-check-label {
+            color: #4a5568;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+        .tool-option {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .tool-option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+        .tool-option.selected {
+            border-color: #667eea;
+            background-color: #f8fafc;
+        }
+        .tool-option i {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #667eea;
+        }
+        .modal-content {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .modal-header {
+            border-radius: 1rem 1rem 0 0;
+            padding: 1.5rem;
+        }
+        .modal-body {
+            padding: 2rem;
+        }
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+        .tools-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .available-tools {
+            background: #f8fafc;
+            border: 2px dashed #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            min-height: 200px;
+        }
+        
+        .selected-tools {
+            background: #f0f9ff;
+            border: 2px dashed #3b82f6;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            min-height: 200px;
+        }
+        
+        .tool-item {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            cursor: move;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+        
+        .tool-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tool-item.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+        
+        .tool-item i {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #667eea;
+        }
+        
+        .drop-zone {
+            border: 2px dashed #3b82f6;
+            background: rgba(59, 130, 246, 0.05);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+            color: #64748b;
+            transition: all 0.3s ease;
+        }
+        
+        .drop-zone.drag-over {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: #2563eb;
+        }
+        
+        .tool-item.selected {
+            background: #f0f9ff;
+            border-color: #3b82f6;
+        }
+        
+        .components-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+            height: calc(100vh - 200px);
+            padding: 1rem;
+        }
+        
+        .components-sidebar {
+            background: white;
+            border-radius: 1rem;
+            padding: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        .work-area {
+            background: white;
+            border-radius: 1rem;
+            padding: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        .component-item {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            cursor: move;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+        
+        .component-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .component-item.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+        
+        .component-item i {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .component-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .component-section h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .drop-zone {
+            border: 2px dashed #3b82f6;
+            background: rgba(59, 130, 246, 0.05);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            min-height: 100px;
+            transition: all 0.3s ease;
+        }
+        
+        .drop-zone.drag-over {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: #2563eb;
+        }
+        
+        .component-form {
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .component-form h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 1rem;
+        }
+        
+        .component-form .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .component-form label {
+            display: block;
+            font-weight: 500;
+            color: #4a5568;
+            margin-bottom: 0.5rem;
+        }
+        
+        .component-form input,
+        .component-form textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            background-color: white;
+            color: #2d3748;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        
+        .component-form input:focus,
+        .component-form textarea:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+        
+        .component-form input::placeholder,
+        .component-form textarea::placeholder {
+            color: #a0aec0;
+        }
+        
+        .component-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .create-agent-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        
+        .create-agent-btn.enabled {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .create-agent-btn.enabled:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.15);
+        }
+        
+        .agent-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+        
+        .agent-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .agent-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px -1px rgba(0, 0, 0, 0.15);
+        }
+        
+        .agent-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .agent-avatar {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+        
+        .agent-info h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin: 0;
+        }
+        
+        .agent-info p {
+            color: #718096;
+            margin: 0;
+        }
+        
+        .agent-details {
+            margin-top: 1rem;
+        }
+        
+        .agent-details p {
+            color: #4a5568;
+            margin-bottom: 0.5rem;
+        }
+        
+        .agent-tools {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .tool-tag {
+            background: #f7fafc;
+            color: #4a5568;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+        }
+        
+        .main-container {
+            display: grid;
+            grid-template-columns: 250px 1fr 300px;
+            gap: 1rem;
+            height: calc(100vh - 80px);
+            padding: 1rem;
+        }
+        
+        .components-sidebar {
+            background: white;
+            border-radius: 1rem;
+            padding: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        .work-area {
+            background: white;
+            border-radius: 1rem;
+            padding: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        .agents-sidebar {
+            background: white;
+            border-radius: 1rem;
+            padding: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        .agents-sidebar h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .agent-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .agent-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .create-agent-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+            pointer-events: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <nav class="gradient-bg text-white p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">🤖 Agent Creation Platform</h1>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <!-- Components Sidebar -->
+        <div class="components-sidebar">
+            <div class="component-section">
+                <h3>Tools</h3>
+                <div class="component-item" draggable="true" data-type="tool" data-tool="wikipedia">
+                    <i class="fas fa-book text-purple-600"></i>
+                    <div class="font-semibold">Wikipedia</div>
+                    <div class="text-sm text-gray-600">Search and retrieve information</div>
+                </div>
+                <div class="component-item" draggable="true" data-type="tool" data-tool="python_repl">
+                    <i class="fas fa-code text-blue-600"></i>
+                    <div class="font-semibold">Python REPL</div>
+                    <div class="text-sm text-gray-600">Execute Python code</div>
+                </div>
+                <div class="component-item" draggable="true" data-type="tool" data-tool="duckduckgo">
+                    <i class="fas fa-search text-green-600"></i>
+                    <div class="font-semibold">DuckDuckGo</div>
+                    <div class="text-sm text-gray-600">Web search engine</div>
+                </div>
+                <div class="component-item" draggable="true" data-type="tool" data-tool="google_search">
+                    <i class="fab fa-google text-red-600"></i>
+                    <div class="font-semibold">Google Search</div>
+                    <div class="text-sm text-gray-600">Web search engine</div>
+                </div>
+            </div>
+            
+            <div class="component-section">
+                <h3>Tasks</h3>
+                <div class="component-item" draggable="true" data-type="task">
+                    <i class="fas fa-tasks text-indigo-600"></i>
+                    <div class="font-semibold">New Task</div>
+                    <div class="text-sm text-gray-600">Define a task for the agent</div>
+                </div>
+            </div>
+            
+            <div class="component-section">
+                <h3>Agents</h3>
+                <div class="component-item" draggable="true" data-type="agent">
+                    <i class="fas fa-robot text-blue-600"></i>
+                    <div class="font-semibold">New Agent</div>
+                    <div class="text-sm text-gray-600">Create a new AI agent</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Work Area -->
+        <div class="work-area">
+            <div class="drop-zone" id="workAreaDropZone">
+                Drag components here to start building your agent
+            </div>
+        </div>
+
+        <!-- Agents Sidebar -->
+        <div class="agents-sidebar">
+            <h3>Your Agents</h3>
+            <div id="agentCards">
+                <!-- Agent cards will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <button id="createAgentBtn" class="create-agent-btn">
+        <i class="fas fa-plus mr-2"></i>Create Agent
+    </button>
+
+    <!-- Create Agent Modal -->
+    <div class="modal fade" id="createAgentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header gradient-bg text-white">
+                    <h5 class="modal-title text-xl font-bold">Create New Agent</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createAgentForm">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="mb-4">
+                                <label class="form-label">Name</label>
+                                <input type="text" class="form-control" name="name" placeholder="Enter agent name" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">Role</label>
+                                <input type="text" class="form-control" name="role" placeholder="Enter agent role" required>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Goal</label>
+                            <textarea class="form-control" name="goal" rows="2" placeholder="What is the agent's main goal?" required></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Backstory</label>
+                            <textarea class="form-control" name="backstory" rows="3" placeholder="Describe the agent's background and personality" required></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Task Description</label>
+                            <textarea class="form-control" name="task_description" rows="3" placeholder="What task should the agent perform?" required></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Expected Output</label>
+                            <textarea class="form-control" name="expected_output" rows="2" placeholder="What should the agent produce?" required></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Tools</label>
+                            <div class="tools-container">
+                                <div class="available-tools">
+                                    <h4 class="text-sm font-semibold text-gray-600 mb-3">Available Tools</h4>
+                                    <div class="tool-item" draggable="true" data-tool="wikipedia">
+                                        <i class="fas fa-book"></i>
+                                        <div class="font-semibold">Wikipedia</div>
+                                        <div class="text-sm text-gray-600">Search and retrieve information</div>
+                                        <input type="checkbox" class="form-check-input d-none" name="tools" value="wikipedia">
+                                    </div>
+                                    <div class="tool-item" draggable="true" data-tool="python_repl">
+                                        <i class="fas fa-code"></i>
+                                        <div class="font-semibold">Python REPL</div>
+                                        <div class="text-sm text-gray-600">Execute Python code</div>
+                                        <input type="checkbox" class="form-check-input d-none" name="tools" value="python_repl">
+                                    </div>
+                                    <div class="tool-item" draggable="true" data-tool="duckduckgo">
+                                        <i class="fas fa-search"></i>
+                                        <div class="font-semibold">DuckDuckGo</div>
+                                        <div class="text-sm text-gray-600">Web search engine</div>
+                                        <input type="checkbox" class="form-check-input d-none" name="tools" value="duckduckgo">
+                                    </div>
+                                    <div class="tool-item" draggable="true" data-tool="google_search">
+                                        <i class="fab fa-google"></i>
+                                        <div class="font-semibold">Google Search</div>
+                                        <div class="text-sm text-gray-600">Web search engine</div>
+                                        <input type="checkbox" class="form-check-input d-none" name="tools" value="google_search">
+                                    </div>
+                                </div>
+                                <div class="selected-tools">
+                                    <h4 class="text-sm font-semibold text-gray-600 mb-3">Selected Tools</h4>
+                                    <div class="drop-zone" id="selectedToolsDropZone">
+                                        Drag tools here
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="createAgent()">
+                        <i class="fas fa-plus mr-2"></i>Create Agent
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Modal -->
+    <div class="modal fade" id="chatModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header gradient-bg text-white">
+                    <h5 class="modal-title">Chat with Agent</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div id="chatMessages" class="mb-4 h-96 overflow-y-auto p-4 bg-gray-50 rounded-lg">
+                        <!-- Chat messages will be inserted here -->
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="messageInput" class="form-control" placeholder="Type your message...">
+                        <button class="btn btn-primary gradient-bg border-0" onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentAgentId = null;
+        let agentComponents = {
+            tools: [],
+            tasks: [],
+            agents: []
+        };
+
+        // Load existing agents on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const response = await fetch('/agents');
+                if (response.ok) {
+                    const agents = await response.json();
+                    agents.forEach(agent => addAgentCard(agent));
+                }
+            } catch (error) {
+                console.error('Error loading agents:', error);
+            }
+
+            initializeDragAndDrop();
+        });
+
+        function initializeDragAndDrop() {
+            const componentItems = document.querySelectorAll('.component-item');
+            const dropZone = document.getElementById('workAreaDropZone');
+            
+            componentItems.forEach(item => {
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragend', handleDragEnd);
+            });
+            
+            dropZone.addEventListener('dragover', handleDragOver);
+            dropZone.addEventListener('dragleave', handleDragLeave);
+            dropZone.addEventListener('drop', handleDrop);
+        }
+
+        function handleDragStart(e) {
+            e.dataTransfer.effectAllowed = 'move';
+            this.classList.add('dragging');
+            
+            const data = {
+                type: this.dataset.type,
+                tool: this.dataset.tool
+            };
+            
+            e.dataTransfer.setData('application/json', JSON.stringify(data));
+        }
+        
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+        }
+        
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const dropZone = document.getElementById('workAreaDropZone');
+            dropZone.classList.add('drag-over');
+        }
+        
+        function handleDragLeave(e) {
+            e.preventDefault();
+            const dropZone = document.getElementById('workAreaDropZone');
+            dropZone.classList.remove('drag-over');
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            const dropZone = document.getElementById('workAreaDropZone');
+            dropZone.classList.remove('drag-over');
+            
+            try {
+                const data = JSON.parse(e.dataTransfer.getData('application/json'));
+                const componentForm = createComponentForm(data);
+                
+                if (componentForm) {
+                    const workArea = document.querySelector('.work-area');
+                    workArea.insertBefore(componentForm, dropZone);
+                    updateCreateButtonState();
+                }
+            } catch (error) {
+                console.error('Error handling drop:', error);
+            }
+        }
+
+        function createComponentForm(data) {
+            const form = document.createElement('div');
+            form.className = 'component-form';
+            form.dataset.componentType = data.type;
+            
+            switch (data.type) {
+                case 'tool':
+                    form.innerHTML = `
+                        <h4>Configure Tool: ${data.tool}</h4>
+                        <div class="form-group">
+                            <label>Tool Settings</label>
+                            <input type="text" class="form-control" placeholder="Enter tool configuration" autocomplete="off">
+                        </div>
+                        <div class="component-actions">
+                            <button type="button" class="btn btn-secondary" onclick="removeComponent(this, '${data.type}', '${data.tool}')">Remove</button>
+                            <button type="button" class="btn btn-primary" onclick="saveComponent(this, '${data.type}', '${data.tool}')">Save</button>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'task':
+                    form.innerHTML = `
+                        <h4>Configure Task</h4>
+                        <div class="form-group">
+                            <label>Task Description</label>
+                            <textarea class="form-control" rows="3" placeholder="What task should the agent perform?" autocomplete="off"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Expected Output</label>
+                            <textarea class="form-control" rows="2" placeholder="What should the agent produce?" autocomplete="off"></textarea>
+                        </div>
+                        <div class="component-actions">
+                            <button type="button" class="btn btn-secondary" onclick="removeComponent(this, '${data.type}')">Remove</button>
+                            <button type="button" class="btn btn-primary" onclick="saveComponent(this, '${data.type}')">Save</button>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'agent':
+                    form.innerHTML = `
+                        <h4>Configure Agent</h4>
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" class="form-control" placeholder="Enter agent name" autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label>Role</label>
+                            <input type="text" class="form-control" placeholder="Enter agent role" autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label>Goal</label>
+                            <textarea class="form-control" rows="2" placeholder="What is the agent's main goal?" autocomplete="off"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Backstory</label>
+                            <textarea class="form-control" rows="3" placeholder="Describe the agent's background and personality" autocomplete="off"></textarea>
+                        </div>
+                        <div class="component-actions">
+                            <button type="button" class="btn btn-secondary" onclick="removeComponent(this, '${data.type}')">Remove</button>
+                            <button type="button" class="btn btn-primary" onclick="saveComponent(this, '${data.type}')">Save</button>
+                        </div>
+                    `;
+                    break;
+            }
+            
+            // Initialize form controls
+            const inputs = form.querySelectorAll('input, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('keydown', function(e) {
+                    e.stopPropagation();
+                });
+            });
+            
+            return form;
+        }
+
+        function saveComponent(button, type, tool = null) {
+            const form = button.closest('.component-form');
+            const inputs = form.querySelectorAll('input, textarea');
+            const data = {};
+            
+            // Validate required fields
+            let isValid = true;
+            inputs.forEach(input => {
+                const value = input.value.trim();
+                if (!value) {
+                    isValid = false;
+                    input.classList.add('border-red-500');
+                } else {
+                    input.classList.remove('border-red-500');
+                }
+                // Convert placeholder to proper field name
+                const fieldName = input.placeholder.toLowerCase()
+                    .replace(/\s+/g, '_')
+                    .replace(/[^a-z0-9_]/g, '');
+                data[fieldName] = value;
+            });
+            
+            if (!isValid) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            if (tool) {
+                data.tool = tool;
+            }
+            
+            // Remove any existing component of the same type
+            agentComponents[type + 's'] = [];
+            agentComponents[type + 's'].push(data);
+            
+            button.disabled = true;
+            button.textContent = 'Saved';
+            updateCreateButtonState();
+        }
+
+        function removeComponent(button, type, tool = null) {
+            const form = button.closest('.component-form');
+            const index = agentComponents[type + 's'].findIndex(item => 
+                tool ? item.tool === tool : true
+            );
+            
+            if (index !== -1) {
+                agentComponents[type + 's'].splice(index, 1);
+            }
+            
+            form.remove();
+            updateCreateButtonState();
+        }
+
+        function updateCreateButtonState() {
+            const createAgentBtn = document.getElementById('createAgentBtn');
+            const hasAllComponents = 
+                agentComponents.tools.length > 0 &&
+                agentComponents.tasks.length > 0 &&
+                agentComponents.agents.length > 0;
+            
+            createAgentBtn.classList.toggle('enabled', hasAllComponents);
+        }
+
+        document.getElementById('createAgentBtn').addEventListener('click', async function() {
+            if (!this.classList.contains('enabled')) return;
+            
+            // Validate that we have all required components
+            if (!agentComponents.agents[0] || !agentComponents.tasks[0] || agentComponents.tools.length === 0) {
+                alert('Please configure all required components (Agent, Task, and at least one Tool)');
+                return;
+            }
+
+            const agentData = {
+                name: agentComponents.agents[0].enter_agent_name,
+                role: agentComponents.agents[0].enter_agent_role,
+                goal: agentComponents.agents[0].what_is_the_agents_main_goal,
+                backstory: agentComponents.agents[0].describe_the_agents_background_and_personality,
+                tools: agentComponents.tools.map(t => t.tool),
+                task: {
+                    description: agentComponents.tasks[0].what_task_should_the_agent_perform,
+                    expected_output: agentComponents.tasks[0].what_should_the_agent_produce
+                }
+            };
+
+            try {
+                const response = await fetch('/agents', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(agentData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addAgentCard(data);
+                    clearWorkArea();
+                } else {
+                    alert('Error creating agent: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error creating agent:', error);
+                alert('Error creating agent: ' + error.message);
+            }
+        });
+
+        function addAgentCard(agent) {
+            const agentCards = document.getElementById('agentCards');
+            const card = document.createElement('div');
+            card.className = 'agent-card';
+            card.onclick = () => openChat(agent.id);
+            
+            card.innerHTML = `
+                <div class="agent-header">
+                    <div class="agent-avatar">${agent.name.charAt(0)}</div>
+                    <div class="agent-info">
+                        <h3>${agent.name}</h3>
+                        <p>${agent.role}</p>
+                    </div>
+                </div>
+                <div class="agent-details">
+                    <p><strong>Goal:</strong> ${agent.goal}</p>
+                    <p><strong>Task:</strong> ${agent.task.description}</p>
+                </div>
+                <div class="agent-tools">
+                    ${agent.tools.map(tool => `
+                        <span class="tool-tag">${tool}</span>
+                    `).join('')}
+                </div>
+            `;
+            
+            agentCards.appendChild(card);
+        }
+
+        function clearWorkArea() {
+            const workArea = document.querySelector('.work-area');
+            const dropZone = document.getElementById('workAreaDropZone');
+            workArea.innerHTML = '';
+            workArea.appendChild(dropZone);
+            agentComponents = { tools: [], tasks: [], agents: [] };
+            updateCreateButtonState();
+        }
+
+        function openChat(agentId) {
+            currentAgentId = agentId;
+            const chatModal = new bootstrap.Modal(document.getElementById('chatModal'));
+            chatModal.show();
+            document.getElementById('chatMessages').innerHTML = '';
+        }
+
+        async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (!message || !currentAgentId) return;
+
+            addMessageToChat('user', message);
+            messageInput.value = '';
+
+            try {
+                const response = await fetch(`/agents/${currentAgentId}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    addMessageToChat('agent', data.response);
+                } else {
+                    addMessageToChat('system', 'Error: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                addMessageToChat('system', 'Error sending message');
+            }
+        }
+
+        function addMessageToChat(sender, message) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${sender}`;
+            messageDiv.innerHTML = `
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 mr-3">
+                        ${sender === 'user' ? 
+                            '<div class="w-8 h-8 rounded-full gradient-bg flex items-center justify-center text-white">U</div>' :
+                            '<div class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white">A</div>'
+                        }
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-semibold mb-1">${sender === 'user' ? 'You' : 'Agent'}</div>
+                        <div class="whitespace-pre-wrap">${message}</div>
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Handle Enter key in message input
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html> 
